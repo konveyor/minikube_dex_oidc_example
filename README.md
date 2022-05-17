@@ -7,6 +7,7 @@ The work in this repo is heavily based on the following sources:
 
 Environments tested
 * Mac M1 with minikube --provider=docker 
+  * Have some hacks in place as I didn't see a clean way to get NodePort to be accessible on Mac from minikube, related to https://github.com/kubernetes/minikube/issues/11193
   
 ## Goals
 * Deploy minikube with [Dex Authenticating through GitHub](https://dexidp.io/docs/connectors/github/) 
