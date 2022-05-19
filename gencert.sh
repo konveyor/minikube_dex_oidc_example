@@ -1,5 +1,8 @@
 #!/bin/bash
 
+command -v openssl >/dev/null 2>&1 || { echo >&2 "openssl is not installed.  Please install and continue."; exit 1; }
+
+
 mkdir -p ssl
 
 cat << EOF > ssl/req.cnf
