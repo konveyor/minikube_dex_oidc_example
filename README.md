@@ -6,6 +6,7 @@ The work in this repo is heavily based on the following sources:
 *  https://github.com/Spantree/dex-demo-github
 
 Environments tested
+* Linux with minikube --provider=podman
 * Mac M1 with minikube --provider=docker 
   * Have some hacks in place as I didn't see a clean way to get NodePort to be accessible on Mac from minikube, related to https://github.com/kubernetes/minikube/issues/11193
   
@@ -64,22 +65,28 @@ Steps:
      * We ran into a few issues with Chrome not liking SHA1 signed certificates so we tweaked the script to use the SHA256 'Signature Algorithm' 
 3. Trust these certs in your web browser
    * Note: For MAC, you can run the script:  `trust_ca_pem.sh` to add these to `/Library/Keychains/System.keychain` 
-4. Run `launch_minikube.sh` 
+   * For Linux, you are likely fine to just accept the certs in the browser at time of accessing the URL
+4. Run `VM_PROVIDER=podman launch_minikube.sh` 
+   * If you need to change to docker set `VM_PROVIDER=docker`
    * Will bring up the k8s cluster via minikube with OIDC configured via Dex
      * copy the generated certificates to `~/.minikube/files/var/lib/minikube/certs/` which gets included in the minikube host.
      * configure the k8s api-server with OIDC
 5. Run `dex_install.sh` to install Dex into the k8s cluster and created needed secrets for the GitHub OAuth2 application
    * Dex will be configured to run with a NodePort Service of 32000
    * Note:  This assumes you have previously sourced `SECRET.source_me`
-6. Port forward the Dex port 5556 to localhost:32000
-   * This is a workaround I needed to do on Mac as I couldn't access the NodePort service with minikube on Mac.  
+6. MAC Only - Port forward the Dex port 5556 to localhost:32000
+   * This is a workaround I needed to do on Mac as I couldn't access the NodePort service with minikube on Mac.  You do NOT need to do this if running on Linux
     * Run: `port_forward_dex.sh`
       * Leave this command running throughout the length of the example
     * Note:  We still do leverage the NodePort Service inside the cluster, this is how the k8s-api-server accesses Dex
       * The k8s-api-server is told to contact Dex for oidc-issuer via the minikube parameter:
         * `--extra-config=apiserver.oidc-issuer-url=https://dex.example.com:32000` from `launch_minikube.sh`
       * Minikube host has it's `/etc/hosts` created at time of launching `launch_minikube.sh`
-7. Edit my `/etc/hosts` on the host you will run your web browser on to add an entry of: `127.0.0.1 dex.example.com`
+7. Edit my `/etc/hosts` on the host you will run your web browser on to add an entry of:
+   * MAC:  `127.0.0.1 dex.example.com`
+      * We will run a port forward on localhost for port local port 32000 to the dex pod
+   * Linux: `192.168.2.49 dex.example.com`
+      * We will leverage the configured NodePort on the k8s server and use the value of `minikube ip`
 
 ## Run a sample application that will authenticate via Dex
 We will deploy a sample application now to leverage Dex, it will login via a GitHub account and then give us a simple webpage that displays the tokens.  We will re-use this same 'ID Token' against the k8s-api-server later.
