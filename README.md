@@ -144,3 +144,6 @@ Before we can test interaction with the k8s-api-server let's configure a Role an
       }
    * With above we expect to see we can List Pods in the `test` namespace as the user in our JWT.  This is sufficient to show the k8s api server is using the 'email' in the JWT to authenticate the user and then is leveraging the RoleBinding we created to check the user can do a List of Pods in the test namespace.
                                              
+
+## Code of Conduct
+Refer to Konveyor's Code of Conduct [here](https://github.com/konveyor/community/blob/main/CODE_OF_CONDUCT.md).
